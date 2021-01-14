@@ -75,3 +75,6 @@ import pyobjconfig as poc
 
 Pytorch overrides `__setattr__` in a way that is incompatible with the `ConfigurableObject` class provided by `pyobjconfig`. To work around this, use the `pyobjconfig.torch.ConfigurableModule` as a drop-in replacement for `torch.nn.Module`.
 
+
+# Changelog
+* 2021-01-14 - v0.1.2. Support lists on the command line.

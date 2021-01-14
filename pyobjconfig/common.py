@@ -165,7 +165,10 @@ class ConfigurableObject:
                 help = props.get(k) or ''
                 if 'default' in v:
                     help = help + f'  Default: {v["default"]}'
-                parser.add_argument(f'--{name}', dest=name, help=help)
+                kw = {}
+                if v.get('type') == 'array':
+                    kw['action'] = 'append'
+                parser.add_argument(f'--{name}', dest=name, help=help, **kw)
         for k in dir(cls):
             v = getattr(cls, k)
             if type(v) is type and issubclass(v, ConfigurableObject):

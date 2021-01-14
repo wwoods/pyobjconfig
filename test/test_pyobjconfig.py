@@ -7,6 +7,7 @@ import argparse
 import os
 import pydantic
 import pytest
+import typing
 
 def test_basic():
     class BaseObject(ConfigurableObject):
@@ -79,4 +80,18 @@ def test_env():
         assert b.config.test == 'testing'
     finally:
         os.environ = old
+
+
+def test_list():
+    class A(ConfigurableObject):
+        class config(PydanticBaseModel):
+            thing: typing.List[int] = [1]
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    A.argparse_setup(ap)
+
+    args = A.argparse_create(ap.parse_args([]).__dict__)
+    assert args.config.thing == [1]
+    args = A.argparse_create(ap.parse_args(['--thing', '2', '--thing', '3']).__dict__)
+    assert args.config.thing == [2, 3]
 
