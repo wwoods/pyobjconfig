@@ -77,4 +77,5 @@ Pytorch overrides `__setattr__` in a way that is incompatible with the `Configur
 
 
 # Changelog
+* 2023-04-18 - v0.1.3. Disallow `None` as parameter values because it serializes poorly, and disallow abbreviated parameter matches to avoid confusion.
 * 2021-01-14 - v0.1.2. Support lists on the command line.

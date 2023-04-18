@@ -87,6 +87,8 @@ class ConfigurableObject:
 
     @classmethod
     def argparse_setup(cls, parser):
+        # Force exact matches only when specifying arguments
+        parser.allow_abbrev = False
         cls._argparse_setup('', parser)
 
 
@@ -223,6 +225,12 @@ class ConfigurableObject:
             r = cls(config=config, child_configurables=post_init)
         except:
             raise TypeError(cls)
+        if r.config is not None:
+            for k, v in r.config.dict().items():
+                if v is None:
+                    raise ValueError(f'Cannot leave parameters as `None`, as '
+                            f' that would break json serialization: '
+                            f'{prefix}{k}')
         return r
 
 

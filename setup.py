@@ -6,7 +6,7 @@ with open('README.md') as f:
 
 setuptools.setup(
         name='pyobjconfig',
-        version='0.1.2',
+        version='0.1.3',
         author='Walt Woods',
         author_email='woodswalben@gmail.com',
         description="An argparse+pydantic-based configuration system for Python.",
