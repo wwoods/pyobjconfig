@@ -168,8 +168,22 @@ class ConfigurableObject:
                 if 'default' in v:
                     help = help + f'  Default: {v["default"]}'
                 kw = {}
-                if v.get('type') == 'array':
+                if v.get('type') == 'array' and v.get('items', {}).get('type') == 'string':
+                    # To allow strings with a comma, do NOT use comma-separated
+                    # for this.
                     kw['action'] = 'append'
+                else:
+                    # Rely on pydantic type conversion
+                    v_field = cls.config.__fields__[k]
+                    def convert_str_to_type(arg, *, v=v, v_field=v_field):
+                        if v.get('type') == 'array':
+                            # Convert to comma-separated-list; 1-d only
+                            if arg.startswith('['):
+                                assert arg.endswith(']')
+                                arg = arg[1:-1]
+                            arg = arg.split(',')
+                        return pydantic.parse_obj_as(v_field.outer_type_, arg)
+                    kw['type'] = convert_str_to_type
                 parser.add_argument(f'--{name}', dest=name, help=help, **kw)
         for k in dir(cls):
             v = getattr(cls, k)

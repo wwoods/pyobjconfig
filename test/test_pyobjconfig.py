@@ -36,7 +36,7 @@ def test_basic():
     obj = BaseObject.argparse_create(args)
     assert obj.config.b == 'yodel'
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(SystemExit) as exc:
         args = ap.parse_args(['--a', 'yodel']).__dict__
         print(args)
         obj = BaseObject.argparse_create(args)
@@ -96,18 +96,41 @@ def test_env():
         os.environ = old
 
 
-def test_list():
+def test_parse_types():
+    '''Ensure that types coming from argparse are correct, rather than relying
+    on pydantic.
+    '''
     class A(ConfigurableObject):
         class config(PydanticBaseModel):
-            thing: typing.List[int] = [1]
+            a: int
+            b: float
+            c: typing.List[int]
+            c2: typing.List[float]
+            c3: typing.List[str]
+            d: str
 
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser()
     A.argparse_setup(ap)
+    args = ap.parse_args(['--a', '1', '--b', '2', '--c', '[1, 2, 3]',
+            '--c2', '1., 2.5, 3', '--c3', 'a,', '--c3', 'b', '--d', '4'])
+    assert args.a == 1
+    assert isinstance(args.a, int)
 
-    args = A.argparse_create(ap.parse_args([]).__dict__)
-    assert args.config.thing == [1]
-    args = A.argparse_create(ap.parse_args(['--thing', '2', '--thing', '3']).__dict__)
-    assert args.config.thing == [2, 3]
+    assert args.b == 2
+    assert isinstance(args.b, float)
+
+    assert args.c == [1, 2, 3]
+    assert isinstance(args.c, list)
+    assert isinstance(args.c[0], int)
+
+    assert args.c2 == [1., 2.5, 3.]
+    assert isinstance(args.c2, list)
+    assert isinstance(args.c2[0], float)
+
+    assert args.c3 == ['a,', 'b']
+
+    assert args.d == '4'
+    assert isinstance(args.d, str)
 
 
 def test_prefix():
